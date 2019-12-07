@@ -1,0 +1,14 @@
+D:\Atio_Terminal\BETA\bin\Release\Atio_Terminal.exe.config
+D:\Atio_Terminal\BETA\bin\Release\Atio_Terminal.exe.manifest
+D:\Atio_Terminal\BETA\bin\Release\Atio_Terminal.application
+D:\Atio_Terminal\BETA\bin\Release\Atio_Terminal.exe
+D:\Atio_Terminal\BETA\bin\Release\Atio_Terminal.pdb
+D:\Atio_Terminal\BETA\obj\Release\Atio_Terminal.csprojAssemblyReference.cache
+D:\Atio_Terminal\BETA\obj\Release\Atio_Terminal.Form1.resources
+D:\Atio_Terminal\BETA\obj\Release\Atio_Terminal.Properties.Resources.resources
+D:\Atio_Terminal\BETA\obj\Release\Atio_Terminal.csproj.GenerateResource.cache
+D:\Atio_Terminal\BETA\obj\Release\Atio_Terminal.csproj.CoreCompileInputs.cache
+D:\Atio_Terminal\BETA\obj\Release\Atio_Terminal.exe.manifest
+D:\Atio_Terminal\BETA\obj\Release\Atio_Terminal.application
+D:\Atio_Terminal\BETA\obj\Release\Atio_Terminal.exe
+D:\Atio_Terminal\BETA\obj\Release\Atio_Terminal.pdb

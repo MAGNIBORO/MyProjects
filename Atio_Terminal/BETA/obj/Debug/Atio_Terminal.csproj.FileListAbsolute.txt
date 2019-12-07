@@ -1,0 +1,34 @@
+C:\Users\Mati Next Gen\Desktop\Atio_Terminal\Atio_Terminal\bin\Debug\Atio_Terminal.exe.config
+C:\Users\Mati Next Gen\Desktop\Atio_Terminal\Atio_Terminal\bin\Debug\Atio_Terminal.exe
+C:\Users\Mati Next Gen\Desktop\Atio_Terminal\Atio_Terminal\bin\Debug\Atio_Terminal.pdb
+C:\Users\Mati Next Gen\Desktop\Atio_Terminal\Atio_Terminal\obj\Debug\Atio_Terminal.csprojAssemblyReference.cache
+C:\Users\Mati Next Gen\Desktop\Atio_Terminal\Atio_Terminal\obj\Debug\Atio_Terminal.Form1.resources
+C:\Users\Mati Next Gen\Desktop\Atio_Terminal\Atio_Terminal\obj\Debug\Atio_Terminal.Properties.Resources.resources
+C:\Users\Mati Next Gen\Desktop\Atio_Terminal\Atio_Terminal\obj\Debug\Atio_Terminal.csproj.GenerateResource.cache
+C:\Users\Mati Next Gen\Desktop\Atio_Terminal\Atio_Terminal\obj\Debug\Atio_Terminal.csproj.CoreCompileInputs.cache
+C:\Users\Mati Next Gen\Desktop\Atio_Terminal\Atio_Terminal\obj\Debug\Atio_Terminal.exe
+C:\Users\Mati Next Gen\Desktop\Atio_Terminal\Atio_Terminal\obj\Debug\Atio_Terminal.pdb
+D:\Atio_Terminal\Atio_Terminal\bin\Debug\Atio_Terminal.exe.config
+D:\Atio_Terminal\Atio_Terminal\bin\Debug\Atio_Terminal.exe
+D:\Atio_Terminal\Atio_Terminal\bin\Debug\Atio_Terminal.pdb
+D:\Atio_Terminal\Atio_Terminal\obj\Debug\Atio_Terminal.csprojAssemblyReference.cache
+D:\Atio_Terminal\Atio_Terminal\obj\Debug\Atio_Terminal.Form1.resources
+D:\Atio_Terminal\Atio_Terminal\obj\Debug\Atio_Terminal.Properties.Resources.resources
+D:\Atio_Terminal\Atio_Terminal\obj\Debug\Atio_Terminal.csproj.GenerateResource.cache
+D:\Atio_Terminal\Atio_Terminal\obj\Debug\Atio_Terminal.csproj.CoreCompileInputs.cache
+D:\Atio_Terminal\Atio_Terminal\obj\Debug\Atio_Terminal.exe
+D:\Atio_Terminal\Atio_Terminal\obj\Debug\Atio_Terminal.pdb
+D:\Atio_Terminal\BETA\obj\Debug\Atio_Terminal.csprojAssemblyReference.cache
+D:\Atio_Terminal\BETA\obj\Debug\Atio_Terminal.Form1.resources
+D:\Atio_Terminal\BETA\obj\Debug\Atio_Terminal.Properties.Resources.resources
+D:\Atio_Terminal\BETA\obj\Debug\Atio_Terminal.csproj.GenerateResource.cache
+D:\Atio_Terminal\BETA\obj\Debug\Atio_Terminal.csproj.CoreCompileInputs.cache
+D:\Atio_Terminal\BETA\obj\Debug\Atio_Terminal.exe
+D:\Atio_Terminal\BETA\obj\Debug\Atio_Terminal.pdb
+D:\Atio_Terminal\BETA\bin\Debug\Atio_Terminal.exe.config
+D:\Atio_Terminal\BETA\bin\Debug\Atio_Terminal.exe
+D:\Atio_Terminal\BETA\bin\Debug\Atio_Terminal.pdb
+D:\Atio_Terminal\BETA\bin\Debug\Atio_Terminal.exe.manifest
+D:\Atio_Terminal\BETA\bin\Debug\Atio_Terminal.application
+D:\Atio_Terminal\BETA\obj\Debug\Atio_Terminal.exe.manifest
+D:\Atio_Terminal\BETA\obj\Debug\Atio_Terminal.application
