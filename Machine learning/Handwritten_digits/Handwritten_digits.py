@@ -12,7 +12,6 @@ N_IN_NEURONS = 28*28
 N_HIDDEN_NEURONS = 16
 N_OUT_NEURONS = 10
 
-
 class Node:
     
     def __init__(self,number_neurons):
@@ -40,35 +39,36 @@ def random_number(low,high):
     return (low + (high-low)*random.random())
 
 def sigmoid(a):
-    return 1/(pow(2.718281828,-a) + 1)
+    return 1/ ( pow(2.718281828,(-1)*a) + 1)
 
 def prod_point(a,b):
     c=0
     for x in range(0,len(a)):
-        c += a[x]*b[x]
+        c += float(a[x])*float(b[x])
     return c
 
-
-"""b = random_array(-1,1,N_IN_NEURONS)
-pepe = Node(N_IN_NEURONS)
-pepe.print()
-print(pepe.calculate(b))
-"""
-
-"print(Traindata.read())"
-
-#first_layer = first_layer.append(Node(N_IN_NEURONS))
-
-piola = Node(N_IN_NEURONS)
+outNeurons=[]
+hiddenNeurons=[]
 labels = []
+
+print(pow(2,-3000))
+for k in range(1,N_HIDDEN_NEURONS):
+    hiddenNeurons.append(Node(N_IN_NEURONS))
+
+for k in range(1,N_OUT_NEURONS):
+    outNeurons.append(Node(N_HIDDEN_NEURONS))
+
 for row in Traindata:
     labels.append(row[0])
-    for x in range(1,len(row)):
-        piola.weights[x-1] = row[x]
+
+    for node in hiddenNeurons:
+        node.calculate(row[1:])
 
     if(Traindata.line_num==1000):
         break
 
-print("hola")
+print(labels)
+
+
 
 
