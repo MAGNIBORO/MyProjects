@@ -5,7 +5,27 @@ import pandas as pd
 def sigmoid(a):
   return (1)/(pow(2.7182818,(-1)*(a))+1)
 
-class Cell(object):
+class Perceptron(object):
+    """Perceptron classifier.
+
+    Parameters
+    ------------
+    lr : float
+      Learning rate (between 0.0 and 1.0)
+    n_iter : int
+      Passes over the training dataset.
+    random_state : int
+      Random number generator seed for random weight
+      initialization.
+
+    Attributes
+    -----------
+    w_ : 1d-array
+      Weights after fitting.
+    errors_ : list
+      Number of misclassifications (updates) in each epoch.
+
+    """
     def __init__(self,n_input ,lr=0.01, n_iter=50,random_state=1):
         rg = np.random.RandomState(1)
         self.lr = lr
@@ -17,10 +37,10 @@ class Cell(object):
       for _ in range(self.n_iter):
         for row in range(len(feat)):
 
-          update = pow(ans[row]-self.predict(feat[row,:]),2) * self.lr/2
+          update = (ans[row]-self.predict(feat[row,:])) * self.lr
           self.w_[0] += update
           for n in range(len(self.w_)-1):
-            self.w_[n+1] += 2*update * feat[row,n]
+            self.w_[n+1] += update * feat[row,n]
       print (self.w_)
       
         
@@ -36,21 +56,17 @@ class Cell(object):
 
 
 data = pd.read_csv('https://archive.ics.uci.edu/ml/''machine-learning-databases/iris/iris.data', header=None)
-data = data.sample(frac=1)
-labels = data.iloc[:, 4].values
-feat = data.iloc[:,:4].values
 
 
-
-#labels2 = np.where(labels == "Iris-versicolor",1,0)
-labels1 = np.where(labels == "Iris-setosa",1,0)
-#labels3 = np.where(labels == "Iris-virginica",1,0)
-
-
-a = Perceptron(4,n_iter=100)
-a.fit(feat,labels1)
+labels = data.iloc[:100, 4].values
+feat = data.iloc[:100,[0,2]].values
+labels = np.where(labels == "Iris-setosa",1,0)
 
 
-print(a.predict(feat[133]))
+a = Perceptron(2,n_iter=100)
+a.fit(feat,labels)
+
+print(a.predict(feat[0]))
+print(a.predict(feat[20]))
+print(a.predict(feat[55]))
 print(a.predict(feat[77]))
-print(a.predict(feat[12]))
