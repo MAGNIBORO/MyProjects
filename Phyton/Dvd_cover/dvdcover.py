@@ -107,7 +107,7 @@ def save_to_docx(name, tipo, lang, color):
      doc.save('Covers\\' + '%s.docx' % name.split('.')[0])
 
 
-os.chdir(r"D:\MIS_COSAS\UBA\Phyton\Dvd_cover")
+os.chdir(r"D:\MIS_COSAS\MyProjects\Phyton\Dvd_cover")
 
 for file in os.listdir(root_folder() + "images\\" ):
     print("Insert the parameters for " + file + "\n (Type) (lang) (Color):\t")

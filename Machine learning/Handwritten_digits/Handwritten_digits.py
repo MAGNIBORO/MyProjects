@@ -1,73 +1,81 @@
 
-import random
-import csv
+import numpy as np
+import pandas as pd
+import time
+import os
 
-#Traindata = open(r"D:\MIS_COSAS\MyProjects\Machine learning\Handwritten_digits\mnist_train.txt","r")
-#Testdata = open(r"D:\MIS_COSAS\MyProjects\Machine learning\Handwritten_digits\mnist_test.txt","r")
-
-Traindata = csv.reader(open(r"D:\MIS_COSAS\MyProjects\Machine learning\Handwritten_digits\mnist_train.txt","r"), delimiter=',')
-Testdata = csv.reader(open(r"D:\MIS_COSAS\MyProjects\Machine learning\Handwritten_digits\mnist_test.txt","r"), delimiter=',')
-
-N_IN_NEURONS = 28*28
-N_HIDDEN_NEURONS = 16
-N_OUT_NEURONS = 10
-
-class Node:
-    
-    def __init__(self,number_neurons):
-        self.weights = random_array(-1,1,number_neurons)
-        self.bias = random_array(-1,1,1)[0]
-
-    def calculate(self,in_values):
-        self.value = sigmoid( prod_point (in_values,self.weights) - self.bias)
-        return self.value
-    
-    def print(self):
-        for x in range(0,len(self.weights)):
-            print("the %d weight and bias is %f\n" % (x,self.weights[x]))
-        print("the bias is %f\n" % (self.bias))
-
-
-def random_array(low,high,number):
-    a = []
-    for x in range(0,number):
-        a.append( random_number(low,high) )
-    
-    return a
-
-def random_number(low,high):
-    return (low + (high-low)*random.random())
+rgen = np.random.RandomState(int(time.time()))
+os.chdir(r"D:\MIS_COSAS\MyProjects\Machine learning\Handwritten_digits")
+data = pd.read_csv("mnist_test.txt")
 
 def sigmoid(a):
-    return 1/ ( pow(2.718281828,(-1)*a) + 1)
+    return (1)/(pow(2.7182818,(-1)*(a))+1)
 
-def prod_point(a,b):
-    c=0
-    for x in range(0,len(a)):
-        c += float(a[x])*float(b[x])
-    return c
+def min_sq(number,predicted):
+    a=[]
+    for k in range(10):
+        if (k == number):
+            a.append(pow( (1 - predicted[k]) ,2))
+        else:
+            a.append(pow( (predicted[k]) ,2))
+    a = np.array(a)
+    return a
 
-outNeurons=[]
-hiddenNeurons=[]
-labels = []
+class Cell:
 
-print(pow(2,-3000))
-for k in range(1,N_HIDDEN_NEURONS):
-    hiddenNeurons.append(Node(N_IN_NEURONS))
+    def __init__(self,n_inputs):
+        self.w = rgen.normal(0,0.01,n_inputs)
+        self.b = rgen.normal(0,0.01,1)
+    def compute(self,X):
+        return sigmoid(self.dot(X))
+    def dot(self,X):
+        return np.dot(self.w,X) + self.b
 
-for k in range(1,N_OUT_NEURONS):
-    outNeurons.append(Node(N_HIDDEN_NEURONS))
 
-for row in Traindata:
-    labels.append(row[0])
+class Cell_array:
+    def __init__(self,n_cells,n_inputs):
+        self.cells=[]
+        for k in range(n_cells):
+            self.cells.append(Cell(n_inputs))
+    def compute(self,X):
+        a = []
+        for cell in self.cells:
+           a.append(cell.compute(X))
+        a = np.array(a)
+        return a
+ #"""def fit (self,X):
+ #       a = []
+ #       for row in range(len(X.index)):
+ #           self.compute(X.iloc[row,:])
+ #   def train(self,X):
+  #      ans = X.iloc[:,0]
+  #      errors = (ans - self.fit( X.iloc[:,1:] ) )**2 """
 
-    for node in hiddenNeurons:
-        node.calculate(row[1:])
 
-    if(Traindata.line_num==1000):
-        break
 
-print(labels)
+inLayer = Cell_array(16,28*28)
+midLayer = Cell_array(16,16)
+outLayer = Cell_array(10,16)
+
+
+total = np.zeros(10)
+
+#for 
+for row in range(25):
+        aux = inLayer.compute(data.iloc[row,1:])
+    #  a = time.time()
+        aux = midLayer.compute(aux)
+        result_final = outLayer.compute(aux)
+        errors = min_sq(data.iloc[row,0] , result_final)
+        total =+ errors
+        print(total)
+    #  print(time.time()-a)
+
+    #  weight adjust(total/(len(X.index)))
+
+
+
+
 
 
 
