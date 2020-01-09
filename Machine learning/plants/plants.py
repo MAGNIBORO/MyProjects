@@ -1,72 +1,29 @@
 
 import numpy as np
 import pandas as pd
+from sklearn import datasets
+from sklearn.model_selection import train_test_split
+from sklearn.linear_model import LogisticRegression
+from sklearn.preprocessing import StandardScaler
 
-def sigmoid(a):
-  return (1)/(pow(2.7182818,(-1)*(a))+1)
-
-class Perceptron(object):
-    """Perceptron classifier.
-
-    Parameters
-    ------------
-    lr : float
-      Learning rate (between 0.0 and 1.0)
-    n_iter : int
-      Passes over the training dataset.
-    random_state : int
-      Random number generator seed for random weight
-      initialization.
-
-    Attributes
-    -----------
-    w_ : 1d-array
-      Weights after fitting.
-    errors_ : list
-      Number of misclassifications (updates) in each epoch.
-
-    """
-    def __init__(self,n_input ,lr=0.01, n_iter=50,random_state=1):
-        rg = np.random.RandomState(1)
-        self.lr = lr
-        self.n_iter = n_iter
-        self.random_state = random_state
-        self.w_ = rg.normal(loc=0,scale=0.01 ,size=n_input +1)
-
-    def fit(self, feat, ans):
-      for _ in range(self.n_iter):
-        for row in range(len(feat)):
-
-          update = (ans[row]-self.predict(feat[row,:])) * self.lr
-          self.w_[0] += update
-          for n in range(len(self.w_)-1):
-            self.w_[n+1] += update * feat[row,n]
-      print (self.w_)
-      
-        
-
-    def net_input(self, feat):
-        """Calculate net input"""
-        return np.dot(feat, self.w_[1:]) + self.w_[0]
-
-    def predict(self, feat):
-        """Return class label after unit step"""
-        return sigmoid(self.net_input(feat))
+iris = datasets.load_iris()
+X = iris.data[:, [0,1,2, 3]]
+y = iris.target
 
 
-
-data = pd.read_csv('https://archive.ics.uci.edu/ml/''machine-learning-databases/iris/iris.data', header=None)
-
-
-labels = data.iloc[:100, 4].values
-feat = data.iloc[:100,[0,2]].values
-labels = np.where(labels == "Iris-setosa",1,0)
+X_train,X_test,y_train,y_test = train_test_split(X,y,test_size=0.2,random_state=1,stratify=y)
+std = StandardScaler()
+std.fit(X_train)
+X_train = std.transform(X_train)
+X_test = std.transform(X_test)
 
 
-a = Perceptron(2,n_iter=100)
-a.fit(feat,labels)
+ib = LogisticRegression(multi_class="ovr",random_state=1)
+ia = LogisticRegression(multi_class="multinomial",random_state=1)
 
-print(a.predict(feat[0]))
-print(a.predict(feat[20]))
-print(a.predict(feat[55]))
-print(a.predict(feat[77]))
+ib.fit(X_train,y_train)
+ia.fit(X_train,y_train)
+
+
+print(ib.score(X_test,y_test))
+print(ia.score(X_test,y_test))
