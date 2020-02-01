@@ -211,11 +211,8 @@ void bbs_menu_print_char_line(const bbs_menu_t *menu, const char *str)
   }
   else{
 
-    if(strlen(str) - bbs_string_escape_len(str) != 1)
-      return;
-
-    char buf[20];
-    strcpy(buf, str);
+    char buf[20] = "";
+    strncat(buf, str,1);
 
     bbs_str_colour(buf, menu->colors.style, menu->colors.edges_foreground, menu->colors.edges_background);
     bbs_print_line(menu->option_max_len + 2, buf);
@@ -230,12 +227,8 @@ void bbs_menu_atach_char(const bbs_menu_t *menu, char *buf, const char *str)
     strcat(buf, str);
   }
   else{
-
-    if(strlen(str) - bbs_string_escape_len(str) != 1)
-      return;
-
-    char aux[20];
-    strcpy(aux, str);
+    char aux[20]="";
+    strncat(aux, str, 1);
 
     bbs_str_colour(aux, menu->colors.style, menu->colors.edges_foreground, menu->colors.edges_background);
     strcat(buf, aux);
@@ -287,7 +280,8 @@ void bbs_menu_atach_string_center(const bbs_menu_t *menu, char *buf, const char 
   strcat(buf, aux_buf);
 }
 
-void bbs_menu_show(const bbs_menu_t *menu, int x, int y, char *roof, char *walls, char *floor)
+// the roof,walls and floor must be bbs_strings, strings or allocated chars (cannot be chars "on the fly")
+void bbs_menu_show(const bbs_menu_t *menu, int x, int y,const char *roof, const char *walls, const char *floor)
 {
 
   if(!menu)
