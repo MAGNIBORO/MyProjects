@@ -2,8 +2,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdbool.h>
 
-bool utils_itoa(char *buf, int in)
+static bool utils_itoa(char *buf, int in)
 {
   if(!buf){
     return false;
@@ -77,6 +78,35 @@ static bool colour_parameters_str(char *str, style_t sty, colour_t for_col, colo
 
 }
 
+bool bbs_is_string(const char *str)
+{
+  return (str[0] == '\033' && str[1] == '[') ? true : false;
+}
+
+int bbs_string_escape_len(const char *str)
+{
+  int total_len = strlen(str);
+  int ret = 0;
+  char ch = '\0';
+
+  if(!str)
+    return 0;
+  if(!bbs_is_string(str))
+    return 0;
+
+  for (int k = 0; ch != 'm'; k++){
+    ch = str[k];
+    ret++;
+  }
+
+  if(str[total_len - 3] != '\033'){
+    // LOG ERROR TO PARSE BBS STRING
+    return 0;
+  }
+
+  return ret + 3;
+}
+
 bool bbs_str_colour(char *buf, style_t sty, colour_t for_col, colour_t back_col)
 {
   char aux_buf[1000];
@@ -113,7 +143,7 @@ bool bbs_str_colour(char *buf, style_t sty, colour_t for_col, colour_t back_col)
   return true;
 }
 
-void bbs_print_line(const int len, const char *str)
+static void bbs_print_line(const int len, const char *str)
 {
   if(!str)
     return;
@@ -133,35 +163,6 @@ void bbs_print_line(const int len, const char *str)
 
   puts(aux);
 
-}
-
-bool bbs_is_string(const char *str)
-{
-  return (str[0] == '\033' && str[1] == '[') ? true : false;
-}
-
-int bbs_string_escape_len(const char *str)
-{
-  int total_len = strlen(str);
-  int ret = 0;
-  char ch = '\0';
-
-  if(!str)
-    return 0;
-  if(!bbs_is_string(str))
-    return 0;
-
-  for (int k = 0; ch != 'm'; k++){
-    ch = str[k];
-    ret++;
-  }
-
-  if(str[total_len - 3] != '\033'){
-    // LOG ERROR TO PARSE BBS STRING
-    return 0;
-  }
-
-  return ret + 3;
 }
 
 bbs_menu_t* bbs_menu_new(const char *str_array, int array_len, int array_str_len, bbs_menu_colour_t colors)
@@ -203,7 +204,7 @@ bool bbs_is_char(const char *str)
   return ((strlen(str) - bbs_string_escape_len(str)) == 1) ? true : false;
 }
 
-void bbs_menu_print_char_line(const bbs_menu_t *menu, const char *str)
+static void bbs_menu_print_char_line(const bbs_menu_t *menu, const char *str)
 {
 
   if(bbs_is_char(str)){
@@ -220,7 +221,7 @@ void bbs_menu_print_char_line(const bbs_menu_t *menu, const char *str)
 
 }
 
-void bbs_menu_atach_char(const bbs_menu_t *menu, char *buf, const char *str)
+static void bbs_menu_atach_char(const bbs_menu_t *menu, char *buf, const char *str)
 {
 
   if(bbs_is_char(str)){
@@ -236,7 +237,7 @@ void bbs_menu_atach_char(const bbs_menu_t *menu, char *buf, const char *str)
 
 }
 
-void bbs_menu_atach_string_center(const bbs_menu_t *menu, char *buf, const char *str, int len)
+static void bbs_menu_atach_string_center(const bbs_menu_t *menu, char *buf, const char *str, int len)
 {
   if(!menu)
     return;

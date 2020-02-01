@@ -55,6 +55,17 @@ typedef struct
   int option_max_len;
 } bbs_menu_t;
 
+bool bbs_is_char(const char *str);
+bool bbs_is_string(const char *str);
+
+int bbs_string_escape_len(const char *str);
 bool bbs_str_colour(char *buf, style_t sty, colour_t for_col, colour_t back_col);
+
+bbs_menu_t* bbs_menu_new(const char *str_array, int array_len, int array_str_len, bbs_menu_colour_t colors);
+void bbs_menu_delete(bbs_menu_t *menu);
+void bbs_menu_show(const bbs_menu_t *menu, int x, int y,const char *roof, const char *walls, const char *floor);
+void bbs_screen_clear();
+
+void bbs_start();
 
 #endif

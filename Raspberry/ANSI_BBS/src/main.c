@@ -3,7 +3,7 @@
 void main()
 {
 
-  char buf[5][40] = { "hola", "AHHHHHHHH", "1234", "mi dios me dio y se inibio", "nul" };
+  char buf[5][40] = { "hola", "AHHHHHHHH", "1234", "mi dios me vio y se inibio", "nul" };
 
   bbs_str_colour(buf[0], STYLE_BOLD, COLOUR_RED, COLOUR_BLACK);
   bbs_str_colour(buf[3], STYLE_BOLD, COLOUR_BLUE, COLOUR_WHITE);
