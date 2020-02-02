@@ -9,6 +9,8 @@
 #define MAX_MENU_OPTIONS (MAX_SCREEN_HORIZONTAL_SIZE+1)
 #define MAX_MENU_OPTION_LEN (MAX_SCREEN_VERTICAL_SIZE+1)
 
+#define MAX_BBS_CHAR_LEN 15
+
 typedef enum
 {
   COLOUR_INVALID = -1,
@@ -49,23 +51,34 @@ typedef struct
 
 typedef struct
 {
-  bbs_menu_colour_t colors;
+  char roof[MAX_BBS_CHAR_LEN];
+  char walls[MAX_BBS_CHAR_LEN];
+  char floor[MAX_BBS_CHAR_LEN];
+} bbs_menu_edges_t;
+
+typedef struct
+{
+  struct bbs_menu_t *child, *next, *prev;
   char options[MAX_MENU_OPTIONS][MAX_MENU_OPTION_LEN];
   int n_options;
   int option_max_len;
+  bbs_menu_colour_t colors;
+  bbs_menu_edges_t edges;
 } bbs_menu_t;
+
 
 bool bbs_is_char(const char *str);
 bool bbs_is_string(const char *str);
 
-int bbs_string_escape_len(const char *str);
+int bbs_strlen(const char *str);
 bool bbs_str_colour(char *buf, style_t sty, colour_t for_col, colour_t back_col);
 
-bbs_menu_t* bbs_menu_new(const char *str_array, int array_len, int array_str_len, bbs_menu_colour_t colors);
+bbs_menu_t* bbs_menu_new(const char *str_array, int array_len, int array_str_len, bbs_menu_colour_t colors, bbs_menu_edges_t edges);
 void bbs_menu_delete(bbs_menu_t *menu);
-void bbs_menu_show(const bbs_menu_t *menu, int x, int y,const char *roof, const char *walls, const char *floor);
+void bbs_menu_show(const bbs_menu_t *menu);
 void bbs_screen_clear();
 
+bool bbs_add_menu_to_menu(bbs_menu_t *father, bbs_menu_t *child);
 void bbs_start();
 
 #endif

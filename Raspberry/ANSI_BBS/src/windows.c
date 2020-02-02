@@ -1,6 +1,6 @@
 #include <windows.h>
 
-void get_scree_size(int *x, int *y)
+void win_get_screen_size(int *x, int *y)
 {
 
   CONSOLE_SCREEN_BUFFER_INFO csbi;
