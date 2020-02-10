@@ -6,8 +6,9 @@
 #define MAX_SCREEN_HORIZONTAL_SIZE 200
 #define MAX_SCREEN_VERTICAL_SIZE 60
 
-#define MAX_MENU_OPTIONS (MAX_SCREEN_HORIZONTAL_SIZE+1)
-#define MAX_MENU_OPTION_LEN (MAX_SCREEN_VERTICAL_SIZE+1)
+#define MAX_MENU_NAME_LEN 20
+#define MAX_MENU_OPTIONS (MAX_SCREEN_VERTICAL_SIZE+1)
+#define MAX_MENU_OPTION_LEN (MAX_SCREEN_HORIZONTAL_SIZE+1)
 
 #define MAX_BBS_CHAR_LEN 15
 
@@ -56,12 +57,21 @@ typedef struct
   char floor[MAX_BBS_CHAR_LEN];
 } bbs_menu_edges_t;
 
+typedef struct{
+
+  char *name;
+  void (*callback)(char *str);
+  int associated_menu;
+}bbs_menu_option_t;
+
 typedef struct
 {
-  struct bbs_menu_t *child, *next, *prev;
-  char options[MAX_MENU_OPTIONS][MAX_MENU_OPTION_LEN];
+  struct bbs_menu_t *child, *next, *prev, *father;
+
+  bbs_menu_option_t option[MAX_MENU_OPTIONS];
   int n_options;
   int option_max_len;
+
   bbs_menu_colour_t colors;
   bbs_menu_edges_t edges;
 } bbs_menu_t;

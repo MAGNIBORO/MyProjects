@@ -4,7 +4,7 @@
 #include <string.h>
 #include <stdbool.h>
 
-static bool utils_itoa(char *buf, int in)
+static bool bbs_itoa(char *buf, int in)
 {
   if(!buf)
     return false;
@@ -38,7 +38,7 @@ static bool colour_parameters_str(char *str, style_t sty, colour_t for_col, colo
     if(sty == k){
 
       char hold[10];
-      utils_itoa(hold, k);
+      bbs_itoa(hold, k);
 
       strcat(str, hold);
       strcat(str, ";");
@@ -50,7 +50,7 @@ static bool colour_parameters_str(char *str, style_t sty, colour_t for_col, colo
     if(for_col == k){
 
       char hold[10];
-      utils_itoa(hold, 30 + k);
+      bbs_itoa(hold, 30 + k);
 
       strcat(str, hold);
       strcat(str, ";");
@@ -62,7 +62,7 @@ static bool colour_parameters_str(char *str, style_t sty, colour_t for_col, colo
     if(back_col == k){
 
       char hold[10];
-      utils_itoa(hold, 40 + k);
+      bbs_itoa(hold, 40 + k);
 
       strcat(str, hold);
       break;
@@ -167,14 +167,13 @@ static void bbs_char_load(char *dst, const char *src, style_t sty, colour_t for_
     bbs_str_colour(dst, sty, for_col, back_col);
   }
 }
-bbs_menu_t* bbs_menu_new(const char *str_array, int array_len, int array_str_len, bbs_menu_colour_t colors, bbs_menu_edges_t edges)
+
+bbs_menu_t* bbs_menu_new(const bbs_menu_option_t *option_array ,int options_qty, bbs_menu_colour_t colors, bbs_menu_edges_t edges)
 {
 
-  if(!str_array)
+  if(!option_array)
     return NULL;
-  if(array_len > MAX_MENU_OPTIONS)
-    return NULL;
-  if(array_str_len > MAX_MENU_OPTION_LEN)
+  if(options_qty > MAX_MENU_OPTIONS)
     return NULL;
 
   bbs_menu_t *ret = malloc(sizeof(bbs_menu_t));
@@ -182,6 +181,13 @@ bbs_menu_t* bbs_menu_new(const char *str_array, int array_len, int array_str_len
   ret->child=NULL;
   ret->prev=NULL;
   ret->next=NULL;
+  ret->father=NULL;
+
+  ret->n_options = options_qty;
+  ret->option_max_len = MAX_MENU_OPTION_LEN;
+
+  memmove(ret->)
+
 // load default styles and colours
   ret->colors.foreground = colors.foreground;
   ret->colors.background = colors.background;
@@ -189,17 +195,11 @@ bbs_menu_t* bbs_menu_new(const char *str_array, int array_len, int array_str_len
   ret->colors.edges_foreground = colors.edges_foreground;
   ret->colors.style = colors.style;
 
+
   bbs_char_load(ret->edges.roof, edges.roof, colors.style, colors.edges_foreground, colors.edges_background);
   bbs_char_load(ret->edges.walls, edges.walls, colors.style, colors.edges_foreground, colors.edges_background);
   bbs_char_load(ret->edges.floor, edges.floor, colors.style, colors.edges_foreground, colors.edges_background);
 
-
-  ret->n_options = array_len;
-  ret->option_max_len = array_str_len;
-
-  for (int k = 0; k < array_len; k++){
-    strcpy(ret->options[k], str_array + k * array_str_len);
-  }
 
   return ret;
 }
@@ -220,6 +220,7 @@ void bbs_menu_delete(bbs_menu_t *menu)
     free(&menu->n_options);
     free(&menu->option_max_len);
     free(&menu->prev);
+    free(menu);
 
     menu = next;
 
@@ -243,14 +244,15 @@ bool bbs_add_menu_to_menu(bbs_menu_t *father,bbs_menu_t *child){
     }
 
     child->prev = last_child;
-    child->next = NULL;
     last_child->next = child;
   }
   else{
     child->prev = NULL;
-    child->next = NULL;
     father->child = child;
   }
+
+  child->next = NULL;
+  child->father = father;
 
   return true;
 }
@@ -268,7 +270,7 @@ static void bbs_menu_print_char_line(const bbs_menu_t *menu, const char *str)
     bbs_print_line(menu->option_max_len + 2, str);
 }
 
-static void bbs_menu_atach_char(const bbs_menu_t *menu, char *buf, const char *str)
+static void bbs_menu_atach_char(char *buf, const bbs_menu_t *menu, const char *str)
 {
 
   if(bbs_is_char(str)){
@@ -284,7 +286,7 @@ static void bbs_menu_atach_char(const bbs_menu_t *menu, char *buf, const char *s
 
 }
 
-static void bbs_menu_atach_string_center(const bbs_menu_t *menu, char *buf, const char *str, int len)
+static void bbs_menu_atach_string_center(char *buf, const bbs_menu_t *menu, const char *str, int len)
 {
   if(!menu)
     return;
@@ -305,6 +307,7 @@ static void bbs_menu_atach_string_center(const bbs_menu_t *menu, char *buf, cons
 
   string_atach_spaces(aux_buf, space_to_fill / 2);
   strcat(aux_buf, "\033[m");
+
 
   if(bbs_is_string(str)){
     strcat(aux_buf, str);
@@ -328,6 +331,20 @@ static void bbs_menu_atach_string_center(const bbs_menu_t *menu, char *buf, cons
   strcat(buf, aux_buf);
 }
 
+void bbs_cursor_move(int x, int y){
+  printf("\033[%d;%dH",y,x);
+}
+
+void bbs_screen_clear()
+{
+  puts("\033[2J");
+}
+
+void bbs_screen_get_size(int *x, int *y)
+{
+  win_get_screen_size(x, y);
+}
+
 void bbs_menu_show(const bbs_menu_t *menu)
 {
 
@@ -342,9 +359,9 @@ void bbs_menu_show(const bbs_menu_t *menu)
 
     strcpy(buf, "");
 
-    bbs_menu_atach_char(menu, buf, menu->edges.walls);
-    bbs_menu_atach_string_center(menu, buf, menu->options[y], menu->option_max_len);
-    bbs_menu_atach_char(menu, buf, menu->edges.walls);
+    bbs_menu_atach_char(buf, menu, menu->edges.walls);
+    bbs_menu_atach_string_center(buf, menu, menu->options[y], menu->option_max_len);
+    bbs_menu_atach_char(buf, menu, menu->edges.walls);
 
     printf("%s\n", buf);
   }
@@ -353,31 +370,103 @@ void bbs_menu_show(const bbs_menu_t *menu)
 
 }
 
-void bbs_screen_clear()
-{
-  puts("\033[2J");
+void bbs_menu_show_center(const bbs_menu_t *menu){
+
+  if(!menu)
+    return;
+
+  int x_scr_len=0, y_scr_len=0;
+
+  bbs_screen_get_size(&x_scr_len, &y_scr_len);
+
+  bbs_menu_show_at(menu, (x_scr_len - menu->option_max_len - 2)/2, (y_scr_len - menu->n_options - 2)/2 );
+
 }
 
-void bbs_get_screen_size(int *x, int *y)
-{
-  win_get_screen_size(x, y);
+void bbs_menu_show_at(const bbs_menu_t *menu, int x_pos, int y_pos){
+
+  if(!menu)
+    return;
+  if(!x_pos)
+    return;
+  if(!y_pos)
+    return;
+
+  char buf[MAX_SCREEN_HORIZONTAL_SIZE];
+
+
+  bbs_cursor_move(x_pos, y_pos);
+  bbs_menu_print_char_line(menu, menu->edges.roof);
+
+  for (int y = 0; y < menu->n_options; y++){
+
+    strcpy(buf, "");
+
+    bbs_menu_atach_char(buf, menu, menu->edges.walls);
+    bbs_menu_atach_string_center(buf, menu, menu->options[y], menu->option_max_len);
+    bbs_menu_atach_char(buf, menu, menu->edges.walls);
+
+    bbs_cursor_move(x_pos, y_pos + 1 + y);
+    printf("%s\n", buf);
+  }
+
+  bbs_cursor_move(x_pos, y_pos + 1 + menu->n_options);
+  bbs_menu_print_char_line(menu, menu->edges.floor);
+}
+
+static bool bbs_exec_key(bbs_menu_t *actual_menu, int *actual_line){
+
+  bool refresh = true;
+
+  switch(getch()){
+    case 'w':
+      *actual_line = (*actual_line == 0) ? actual_menu->n_options - 1 : *actual_line - 1;
+    break;
+
+    case 's':
+      *actual_line = (*actual_line == (actual_menu->n_options - 1)) ? 0 : *actual_line + 1;
+    break;
+
+    case '\r':
+      *actual_line = 0;
+      actual_menu = bbs_get_menu_child_from_index(*actual_line);
+    break;
+
+    case '\07':
+      *actual_line = 0;
+      actual_menu = actual_menu->father;
+    break;
+
+    default:
+      refresh = false;
+  }
+
+  return refresh;
 }
 
 void bbs_start(const bbs_menu_t *menu)
 {
+  bool refresh = true;
+  bbs_menu_t *actual_menu;
+  int actual_sel_line = 0;
+
+  actual_menu = bbs_menu_new_empty();
+  bbs_menu_copy(actual_menu, menu);
 
   for (;;){
 
-    int x_len, y_len;
+    if(refresh){
+      bbs_str_colour(&actual_menu.options_name[actual_sel_line], STYLE_REVERSE, actual_menu.colors.foreground, actual_menu.colors.background );
+      bbs_screen_clear();
+      bbs_menu_show_center(actual_menu);
+      refresh = false;
+    }
 
-    bbs_get_screen_size(&x_len, &y_len);
-    //   bbs_menu_show_center(menu);
+    refresh = bbs_exec_key(actual_menu, &actual_sel_line);
+
 
   }
 }
-
-
-
 
 
 
