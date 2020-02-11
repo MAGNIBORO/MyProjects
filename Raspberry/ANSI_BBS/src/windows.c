@@ -9,3 +9,7 @@ void win_get_screen_size(int *x, int *y)
   *y = csbi.srWindow.Bottom - csbi.srWindow.Top + 1;
 
 }
+
+void msleep(int a){
+  Sleep(a);
+}
