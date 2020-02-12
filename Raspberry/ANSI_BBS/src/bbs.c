@@ -4,6 +4,41 @@
 #include <string.h>
 #include <stdbool.h>
 
+
+#ifdef WIN32
+#include <windows.h>
+
+void get_screen_size(int *x, int *y)
+{
+
+  CONSOLE_SCREEN_BUFFER_INFO csbi;
+  GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &csbi);
+  *x = csbi.srWindow.Right - csbi.srWindow.Left + 1;
+  *y = csbi.srWindow.Bottom - csbi.srWindow.Top + 1;
+
+}
+
+void msleep(int a){
+  Sleep(a);
+}
+
+bool key_is_pressed(){
+  return kbhit();
+}
+
+#endif
+
+bool bbs_window_is_resized(int x, int y){
+  int aux_x,aux_y;
+
+  bbs_screen_get_size(&aux_x,&aux_y);
+
+  if( (x!=aux_x) || (y!=aux_y) )
+    return true;
+
+  return false;
+}
+
 static bool bbs_itoa(char *buf, int in)
 {
   if(!buf)
@@ -401,7 +436,7 @@ void bbs_screen_clear()
 
 void bbs_screen_get_size(int *x, int *y)
 {
-  win_get_screen_size(x, y);
+  get_screen_size(x, y);
 }
 
 void bbs_menu_show(const bbs_menu_t *menu)
@@ -436,9 +471,7 @@ static void bbs_menu_print_row(const bbs_menu_t *menu, char *str, int x_pos, int
   char buf[MAX_SCREEN_HORIZONTAL_SIZE] = "";
 
   bbs_menu_atach_char(buf, menu, menu->format.edges.walls);
-  string_atach_spaces(buf,menu->format.edges.x_margin);
-  bbs_menu_atach_string_center(buf, menu, str, menu->option_max_len);
-  string_atach_spaces(buf,menu->format.edges.x_margin);
+  bbs_menu_atach_string_center(buf, menu, str, menu->option_max_len + 2*menu->format.edges.x_margin);
   bbs_menu_atach_char(buf, menu, menu->format.edges.walls);
 
   bbs_cursor_move(x_pos, y_pos);
@@ -539,43 +572,86 @@ void *bbs_menucpy(bbs_menu_t *to, const bbs_menu_t *from){
   return memcpy(to,from,sizeof(bbs_menu_t));
 }
 
+void bbs_menu_exec_line_change(bbs_menu_t *actual_menu,char *actual_line_str,char *buf ,int actual_sel_line){
+
+  strcpy(buf, actual_line_str);
+  bbs_str_colour(buf, actual_menu->format.colors.style, actual_menu->format.colors.background, actual_menu->format.colors.foreground);
+  actual_menu->option[actual_sel_line].name = buf;
+
+  bbs_screen_clear();
+  bbs_menu_show_center(actual_menu);
+
+}
+
 void bbs_start(const bbs_menu_t *menu)
 {
-  bool refresh = true;
   bbs_menu_t *actual_menu;
   int actual_sel_line = 0;
-  int previous_sel_line = 0;
-
-  char actual_line_str[MAX_MENU_OPTION_LEN];
-  char *prev_line_str;
+  int window_x_len = 0,window_y_len = 0;
 
   actual_menu = bbs_menu_container();
   bbs_menucpy(actual_menu, menu);
 
-  prev_line_str = actual_menu->option[actual_sel_line].name;
+  char buf[MAX_MENU_OPTION_LEN];
+  char *actual_line_str = actual_menu->option[actual_sel_line].name;
+
+
+  bbs_menu_exec_line_change(actual_menu,actual_line_str,buf ,actual_sel_line);
 
   for (;;){
 
-    while(refresh){
-      actual_menu->option[previous_sel_line].name = prev_line_str;
-      strcpy(actual_line_str, actual_menu->option[actual_sel_line].name);
-      bbs_str_colour(actual_line_str, actual_menu->format.colors.style, actual_menu->format.colors.background, actual_menu->format.colors.foreground);
+    if(key_is_pressed()){
+      switch(getch()){
 
-      prev_line_str = actual_menu->option[actual_sel_line].name;
-      previous_sel_line = actual_sel_line;
+        case 'w':
+          actual_menu->option[actual_sel_line].name = actual_line_str;
+          actual_sel_line = (actual_sel_line == 0) ? actual_menu->n_options - 1 : actual_sel_line - 1;
+          actual_line_str = actual_menu->option[actual_sel_line].name;
+          bbs_menu_exec_line_change(actual_menu,actual_line_str,buf ,actual_sel_line);
+        break;
 
-      actual_menu->option[actual_sel_line].name = actual_line_str;
 
-      bbs_screen_clear();
-      bbs_menu_show_center(actual_menu);
-      refresh = false;
+        case 's':
+          actual_menu->option[actual_sel_line].name = actual_line_str;
+          actual_sel_line = (actual_sel_line == (actual_menu->n_options - 1)) ? 0 : actual_sel_line + 1;
+          actual_line_str = actual_menu->option[actual_sel_line].name;
+          bbs_menu_exec_line_change(actual_menu,actual_line_str,buf ,actual_sel_line);
+        break;
+
+        case '\r':
+          if(actual_menu->option[actual_sel_line].associated_menu != UNKNOW_MENU){
+            bbs_menucpy(actual_menu, bbs_get_child_menu_from_index(actual_menu, actual_menu->option[actual_sel_line].associated_menu));
+            actual_sel_line = 0;
+            actual_line_str = actual_menu->option[actual_sel_line].name;
+            bbs_menu_exec_line_change(actual_menu,actual_line_str,buf ,actual_sel_line);
+          }
+        break;
+
+        case '\033':
+          if(actual_menu->father != NULL){
+            bbs_menucpy(actual_menu, actual_menu->father);
+            actual_sel_line = 0;
+            actual_line_str = actual_menu->option[actual_sel_line].name;
+            bbs_menu_exec_line_change(actual_menu,actual_line_str,buf ,actual_sel_line);
+          }
+        break;
+
+      default:
+        ;
+      }
     }
 
-    refresh = bbs_exec_key(actual_menu, &actual_sel_line, &previous_sel_line);
+//    msleep(10);
+//    bbs_screen_get_size(&window_x_len,&window_y_len);
+//
+//    if( bbs_window_is_resized(window_x_len,window_y_len) ){
+//      bbs_screen_clear();
+//      bbs_menu_show_center(actual_menu);
+//    }
 
   }
 
-
+  bbs_menu_delete(actual_menu);
 }
 
 

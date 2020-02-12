@@ -1,6 +1,10 @@
 #ifndef _BBS_H_
 #define _BBS_H_
 
+#ifndef  WIN32
+#def WIN32
+#endif
+
 #include <stdbool.h>
 
 #define MAX_SCREEN_HORIZONTAL_SIZE 200
@@ -15,6 +19,12 @@
 
 #define UNKNOW_OPTION (MAX_MENU_OPTIONS + 1)
 #define UNKNOW_MENU 255
+
+typedef enum{
+  STATE_LOW,
+  STATE_SAME,
+  STATE_UP
+}menu_state;
 
 typedef enum
 {

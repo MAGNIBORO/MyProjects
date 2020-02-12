@@ -26,13 +26,13 @@ bbs_menu_edges_t cedge = { .roof = "-", .walls = "|", .floor = "-", .x_margin = 
 void main()
 {
 
-  char abuf[5][40] = { "hola", "AHHHHHHHH", "1234", "mi dios me vio y se inibio", "nul" };
+  char abuf[5][40] = { "opcion 1", "opcion 2", "opcion 3", "opcion 4", "opcion 5" };
   void (*aptr[5])(void) = {NULL,NULL,NULL,NULL,NULL};
   bool a_arr[5] = {false,false,false,false,false};
-  char bbuf[2][40] = { "menub", "xd"};
+  char bbuf[2][40] = { "opcion 6", "opcion 7"};
   void (*bptr[2])(void) = {NULL,NULL,NULL,NULL,NULL};
   bool b_arr[2] = {false,false};
-  char cbuf[10][40] = { "hola", "AHHHHHHHH", "1234", "mi dios me vio y se inibio", "nul" ,"hola", "AHHHHHHHH", "1234", "mi dios me vio y se inibio", "nul"};
+  char cbuf[10][40] = { "opcion 8", "opcion 9", "opcion 10", "opcion 11", "opcion 12" ,"opcion 13", "opcion 14", "opcion 15", "opcion 16", "opcion 17"};
   void (*cptr[10])(void) = {NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL};
   bool c_arr[10] = {false,false,false,false,false,false,false,false,false,false};
 
