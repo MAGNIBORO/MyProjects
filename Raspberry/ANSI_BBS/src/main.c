@@ -17,28 +17,66 @@ bbs_menu_colour_t cformat = {.background = COLOUR_WHITE,.foreground = COLOUR_BLA
 
 bbs_menu_edges_t cedge = { .roof = "-", .walls = "|", .floor = "-", .x_margin = 5, .y_margin = 3};
 
-//int pepe=0;
-//
-//void mas(){
-//  pepe++;
-//}
+bbs_menu_colour_t dformat = {.background = COLOUR_WHITE,.foreground = COLOUR_BLACK,.edges_background = COLOUR_WHITE,.edges_foreground = COLOUR_BLACK,
+    .style = STYLE_BOLD };
+
+bbs_menu_edges_t dedge = { .roof = "-", .walls = "|", .floor = "-", .x_margin = 5, .y_margin = 3};
+
+char sum[10];
+int x=0,y=0;
+
+void suma(void){
+  bbs_itoa(sum,x+y);
+}
+void resta(void){
+  bbs_itoa(sum,x-y);
+}
+void division(void){
+  bbs_itoa(sum,x/y);
+}
+void multiplicacion(void){
+  bbs_itoa(sum,x*y);
+}
+
+void asignar_x1(char * x1){
+  x = atoi(x1);
+}
+void asignar_x2(char * x2){
+  y = atoi(x2);
+}
+
+
+
 
 void main()
 {
 
-  char abuf[5][40] = { "opcion 1", "opcion 2", "opcion 3", "opcion 4", "opcion 5" };
-  void (*aptr[5])(void) = {NULL,NULL,NULL,NULL,NULL};
-  bool a_arr[5] = {false,false,false,false,false};
-  char bbuf[2][40] = { "opcion 6", "opcion 7"};
-  void (*bptr[2])(void) = {NULL,NULL,NULL,NULL,NULL};
-  bool b_arr[2] = {false,false};
-  char cbuf[10][40] = { "opcion 8", "opcion 9", "opcion 10", "opcion 11", "opcion 12" ,"opcion 13", "opcion 14", "opcion 15", "opcion 16", "opcion 17"};
-  void (*cptr[10])(void) = {NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL};
-  bool c_arr[10] = {false,false,false,false,false,false,false,false,false,false};
+  char *abuf[3] = { "Ingresar numeros", "Operacion", "Ver resultado"};
+  void (*aptr[3])(char*) = {NULL,NULL,NULL};
+  bool a_arr[3] = {false,false,false};
 
-  bbs_menu_option_t ap[5];
-  bbs_menu_option_t bp[2];
-  bbs_menu_option_t cp[10];
+  char *bbuf[4] = { "Numero 1","","Numero 2",""};
+  void (*bptr[4])(char*) = {NULL,asignar_x1,NULL,asignar_x2};
+  bool b_arr[4] = {false,true,false,true};
+
+  char *cbuf[4] = { "Sumar", "Restar", "Dividir", "Multiplicar"};
+
+  void (*cptr[4])(char*);
+  cptr[0] = (void(*)(char*))suma;
+  cptr[1] = (void(*)(char*))resta;
+  cptr[2] = (void(*)(char*))division;
+  cptr[3] = (void(*)(char*))multiplicacion;
+
+  bool c_arr[4] = {false,false,false,false};
+
+  char *dbuf[2] = { "Resultado", sum};
+  void (*dptr[2])(char*) = {NULL,NULL};
+  bool d_arr[2] = {false,false};
+
+  bbs_menu_option_t ap[3];
+  bbs_menu_option_t bp[4];
+  bbs_menu_option_t cp[4];
+  bbs_menu_option_t dp[2];
 
 
 //  bbs_str_colour(buf[0], STYLE_BOLD, COLOUR_RED, COLOUR_BLACK);
@@ -46,17 +84,21 @@ void main()
 //  bbs_str_colour(edge.roof, STYLE_ITALIC, COLOUR_BLUE, COLOUR_CYAN);
 //  bbs_str_colour(edge.walls, STYLE_BOLD, COLOUR_RED, COLOUR_GREEN);
 
-  bbs_option_menu_new(ap,abuf,40,aptr,a_arr,5);
-  bbs_menu_t *a = bbs_menu_new(ap, 5, aformat, aedge);
+  bbs_option_menu_new(ap,abuf,aptr,a_arr,3);
+  bbs_menu_t *a = bbs_menu_new(ap, 3, aformat, aedge);
 
-  bbs_option_menu_new(bp,bbuf,40,bptr,b_arr,2);
-  bbs_menu_t *b = bbs_menu_new(bp, 2, bformat, bedge);
+  bbs_option_menu_new(bp,bbuf,bptr,b_arr,4);
+  bbs_menu_t *b = bbs_menu_new(bp, 4, bformat, bedge);
 
-  bbs_option_menu_new(cp,cbuf,40,cptr,c_arr,10);
-  bbs_menu_t *c = bbs_menu_new(cp, 10, cformat, cedge);
+  bbs_option_menu_new(cp,cbuf,cptr,c_arr,4);
+  bbs_menu_t *c = bbs_menu_new(cp, 4, cformat, cedge);
+
+  bbs_option_menu_new(dp,dbuf,dptr,d_arr,2);
+  bbs_menu_t *d = bbs_menu_new(dp, 2, dformat, dedge);
 
   bbs_add_menu_to_menu(a, b, 0);
-  bbs_add_menu_to_menu(a, c, 2);
+  bbs_add_menu_to_menu(a, c, 1);
+  bbs_add_menu_to_menu(a, d, 2);
 
   bbs_screen_clear();
   bbs_start(a);

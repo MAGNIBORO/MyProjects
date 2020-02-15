@@ -20,6 +20,8 @@
 #define UNKNOW_OPTION (MAX_MENU_OPTIONS + 1)
 #define UNKNOW_MENU 255
 
+#define UNDERSCORE_BLINK_MS 500
+
 typedef enum{
   STATE_LOW,
   STATE_SAME,
@@ -76,7 +78,7 @@ typedef struct
 typedef struct{
 
   char *name;
-  void (*callback)(void);
+  void (*callback)(char*);
   int associated_menu;
   bool is_prompt;
   char *value_string;
@@ -97,14 +99,17 @@ typedef struct
   bbs_menu_format format;
 }bbs_menu_t;
 
+bool bbs_itoa(char *buf, int in);
 bool bbs_is_char(const char *str);
 bool bbs_is_string(const char *str);
+void bbs_screen_get_size(int *x, int *y);
 
 int bbs_strlen(const char *str);
 bool bbs_str_colour(char *buf, style_t sty, colour_t for_col, colour_t back_col);
+void bbs_screen_get_size(int *x, int *y);
 
 void *bbs_menucpy(bbs_menu_t *to, const bbs_menu_t *from);
-bool bbs_option_menu_new(bbs_menu_option_t ret[], char *str_array,int str_len ,void (*callbacks_array)(void),bool *is_prompt_array, int options_qty);
+bool bbs_option_menu_new(bbs_menu_option_t ret[], char *str_array[], void (*callbacks_array[])(char*),bool *is_prompt_array, int options_qty);
 bbs_menu_t* bbs_menu_new(bbs_menu_option_t *option_array ,int options_qty, bbs_menu_colour_t colors, bbs_menu_edges_t edges);
 void bbs_menu_delete(bbs_menu_t *menu);
 void bbs_menu_show(const bbs_menu_t *menu);
