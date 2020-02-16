@@ -114,7 +114,7 @@ static bool colour_parameters_str(char *str, style_t sty, colour_t for_col, colo
 
 bool bbs_is_string(const char *str)
 {
-  return (str[0] == '\033' && str[1] == '[') ? true : false;
+  return (str[0] == KEY_ESCAPE && str[1] == '[') ? true : false;
 }
 
 int bbs_esclen(const char *str)
@@ -133,7 +133,7 @@ int bbs_esclen(const char *str)
     ret++;
   }
 
-  if(str[total_len - 3] != '\033'){
+  if(str[total_len - 3] != KEY_ESCAPE){
     // LOG ERROR TO PARSE BBS STRING
     return 0;
   }
@@ -326,7 +326,11 @@ bool bbs_add_menu_to_menu(bbs_menu_t *father, bbs_menu_t *child, int assosiated_
     return false;
   if(!child)
     return false;
-
+  if(father->option[assosiated_option].is_prompt){
+    //the same option cannot be a prompt and acces to a new menu
+    //LOG("CANNOT ADD MENU TO PROMPT OPTION");
+    return false;
+  }
   bbs_menu_t *last_child = father->child;
   int n_menu = 0;
 
@@ -361,6 +365,16 @@ bool bbs_is_char(const char *str)
     return false;
 
   return (bbs_strlen(str) == 1) ? true : false;
+}
+
+void bbs_print_char(char ch, style_t sty, colour_t foreground, colour_t background)
+{
+
+  char buf[MAX_ESCAPE_GRAPH_LEN + 1] = "";
+  strncat(buf, &ch, 1);
+  bbs_str_colour(buf, sty, foreground, background);
+
+  printf("%s", buf);
 }
 
 static void bbs_menu_print_char_line(const bbs_menu_t *menu, const char *str)
@@ -428,9 +442,29 @@ static void bbs_menu_atach_string_center(char *buf, const bbs_menu_t *menu, cons
   strcat(buf, aux_buf);
 }
 
-void bbs_cursor_move(int x, int y)
+void bbs_cursor_move(int x_pos, int y_pos)
 {
-  printf("\033[%d;%dH", y, x);
+  printf("\033[%d;%dH", y_pos, x_pos);
+}
+
+void bbs_cursor_move_up(int n_lines)
+{
+  printf("\033[%dA", n_lines);
+}
+
+void bbs_cursor_move_down(int n_lines)
+{
+  printf("\033[%dB", n_lines);
+}
+
+void bbs_cursor_move_right(int n_lines)
+{
+  printf("\033[%dC", n_lines);
+}
+
+void bbs_cursor_move_left(int n_lines)
+{
+  printf("\033[%dD", n_lines);
 }
 
 void bbs_screen_clear()
@@ -547,7 +581,79 @@ void* bbs_menucpy(bbs_menu_t *to, const bbs_menu_t *from)
   return memcpy(to, from, sizeof(bbs_menu_t));
 }
 
-void bbs_menu_no_option_prompt_highlight(bbs_menu_t *actual_menu, char *actual_line_str, char *buf, int actual_sel_line, int actual_column, int actual_row)
+bool bbs_timer(time_t *actual_time, time_t *start_time, bool *flag, int timer_ms)
+{
+
+  *actual_time = clock();
+  double diff_time_ms = (*actual_time - *start_time) * 1000 / CLOCKS_PER_SEC;
+
+  if(diff_time_ms > timer_ms){
+    *start_time = clock();
+    *flag = !(*flag);
+    return true;
+  }
+
+  return false;
+}
+
+static void bbs_menu_print_string(const bbs_menu_t *menu, const char *buf)
+{
+
+  if(!menu)
+    return;
+  if(!buf)
+    return;
+
+  if(bbs_is_string(buf)){
+    printf(buf);
+  }
+  else{
+
+    char aux_buf[MAX_MENU_OPTION_LEN];
+    strcpy(aux_buf, buf);
+    bbs_str_colour(aux_buf, menu->format.colors.style, menu->format.colors.foreground, menu->format.colors.background);
+
+    printf(aux_buf);
+
+  }
+}
+
+void bbs_menu_row_update(bbs_menu_t *menu, char *buf, char ch)
+{
+  bool str_is_even = (menu->option_max_len - strlen(buf)) % 2 == 0;
+
+  if(ch != KEY_BACKSPACE){
+
+    if(str_is_even){
+
+      bbs_cursor_move_left(strlen(buf));
+      bbs_menu_print_string(menu, buf);
+
+    }
+    else{
+      bbs_print_char(ch, menu->format.colors.style, menu->format.colors.foreground, menu->format.colors.background);
+    }
+
+  }
+  else{
+    bbs_cursor_move_left(1);
+    bbs_print_char(' ', menu->format.colors.style, menu->format.colors.foreground, menu->format.colors.background);
+    bbs_cursor_move_left(1);
+
+    if((menu->option_max_len - strlen(buf)) % 2 == 1){
+
+      bbs_cursor_move_left(strlen(buf));
+      bbs_print_char(' ', menu->format.colors.style, menu->format.colors.foreground, menu->format.colors.background);
+
+      bbs_menu_print_string(menu, buf);
+
+    }
+
+  }
+
+}
+
+void bbs_menu_no_prompt_option_highlight(bbs_menu_t *actual_menu, char *actual_line_str, char *buf, int actual_sel_line, int actual_column, int actual_row)
 {
 
   strcpy(buf, actual_line_str);
@@ -560,27 +666,7 @@ void bbs_menu_no_option_prompt_highlight(bbs_menu_t *actual_menu, char *actual_l
 
 }
 
-bool bbs_blink_underscore(time_t actual_time, time_t start_time, char *buf, bool *is_str_underscored)
-{
-
-  double diff_time_ms = (actual_time - start_time) * 1000 / CLOCKS_PER_SEC;
-
-  if(diff_time_ms > UNDERSCORE_BLINK_MS){
-
-    if((*is_str_underscored)){
-      buf[strlen(buf) - 1] = '\0';
-    }
-    else{
-      strcat(buf, "_");
-    }
-
-    *is_str_underscored = !(*is_str_underscored);
-    return true;
-  }
-  return false;
-}
-
-void bbs_menu_prompt_option_highlight(bbs_menu_t *actual_menu, char *buf, int actual_sel_line, int actual_column, int actual_row)
+void bbs_menu_prompt_option_highlight(bbs_menu_t *actual_menu, char *buf, int actual_sel_line, int *actual_column, int *actual_row)
 {
 
   if(!buf)
@@ -592,63 +678,47 @@ void bbs_menu_prompt_option_highlight(bbs_menu_t *actual_menu, char *buf, int ac
 
   strcpy(buf, "");
   actual_menu->option[actual_sel_line].name = buf;
-  bool is_str_underscored = true;
-  char ch = '_';
+  bbs_screen_line_clear(*actual_row);
+  bbs_menu_print_row(actual_menu, buf, *actual_column, *actual_row);
 
-  clock_t actual_time, start_time;
-  actual_time = clock();
-  start_time = clock();
+  char ch = '\0';
 
-  while (ch != '\r'){
+
+  *actual_column += actual_menu->format.edges.x_margin + actual_menu->option_max_len / 2 + 1;
+  bbs_cursor_move(*actual_column, *actual_row);
+
+  while (ch != KEY_ENTER){
 
     if(key_is_pressed()){
       ch = getch();
 
-      if(ch == '\0177'){
-        if(is_str_underscored){
-          buf[strlen(buf) - 2] = '\0';
-        }
-        else{
-          buf[strlen(buf) - 1] = '\0';
-        }
+      switch (ch) {
+
+        case KEY_ENTER:
+          break;
+
+        case KEY_BACKSPACE:
+          if(strlen(buf) > 0){
+            buf[strlen(buf) - 1] = '\0';
+            bbs_menu_row_update(actual_menu, buf, ch);
+          }
+          break;
+
+        default:
+          if(strlen(buf) < actual_menu->option_max_len){
+            strncat(buf, &ch, 1);
+            bbs_menu_row_update(actual_menu, buf, ch);
+          }
       }
-      else if(ch != '\r'){
-        if(is_str_underscored){
-          buf[strlen(buf) - 1] = '\0';
-          strncat(buf, &ch, 1);
-          strcat(buf, "_");
-        }
-        else{
-          strncat(buf, &ch, 1);
-        }
-      }
-      else{
-
-        if(is_str_underscored)
-          buf[strlen(buf) - 1] = '\0';
-
-        break;
-      }
-
-      bbs_screen_clear();
-      bbs_menu_show_center(actual_menu);
-    }
-
-    actual_time = clock();
-
-    if(bbs_blink_underscore(actual_time, start_time, buf, &is_str_underscored)){
-      start_time = clock();
-      bbs_screen_line_clear(actual_row);
-      bbs_menu_print_row(actual_menu, buf, actual_column, actual_row);
     }
 
   }
 
+  *actual_column -= actual_menu->format.edges.x_margin + actual_menu->option_max_len / 2 + 1;
 }
 
 void bbs_get_coordinates_of_selected_line(bbs_menu_t *menu, int *x_pos, int *y_pos, int actual_sel_line)
 {
-
   int x_scr_len, y_scr_len;
   bbs_screen_get_size(&x_scr_len, &y_scr_len);
 
@@ -658,10 +728,11 @@ void bbs_get_coordinates_of_selected_line(bbs_menu_t *menu, int *x_pos, int *y_p
 
 void bbs_menu_row_normalize(bbs_menu_t *menu, char *actual_line_str, int actual_sel_line, int actual_column, int actual_row)
 {
-
-  menu->option[actual_sel_line].name = actual_line_str;
-  bbs_screen_line_clear(actual_sel_line);
-  bbs_menu_print_row(menu, menu->option[actual_sel_line].name, actual_column, actual_row);
+  if( menu->option[actual_sel_line].is_prompt == false){
+    menu->option[actual_sel_line].name = actual_line_str;
+    bbs_screen_line_clear(actual_sel_line);
+    bbs_menu_print_row(menu, menu->option[actual_sel_line].name, actual_column, actual_row);
+  }
 }
 
 void bbs_menu_line_exec(bbs_menu_t *menu, char *actual_line_str, int actual_sel_line, char *actual_str_buff, int *actual_column, int *actual_row)
@@ -670,10 +741,10 @@ void bbs_menu_line_exec(bbs_menu_t *menu, char *actual_line_str, int actual_sel_
   bbs_get_coordinates_of_selected_line(menu, actual_column, actual_row, actual_sel_line);
 
   if(menu->option[actual_sel_line].is_prompt){
-    bbs_menu_prompt_option_highlight(menu, actual_str_buff, actual_sel_line, *actual_column, *actual_row);
+    bbs_menu_prompt_option_highlight(menu, actual_str_buff, actual_sel_line, actual_column, actual_row);
   }
   else{
-    bbs_menu_no_option_prompt_highlight(menu, actual_line_str, actual_str_buff, actual_sel_line, *actual_column, *actual_row);
+    bbs_menu_no_prompt_option_highlight(menu, actual_line_str, actual_str_buff, actual_sel_line, *actual_column, *actual_row);
   }
 
 }
@@ -683,6 +754,8 @@ void bbs_start(const bbs_menu_t *menu)
   bbs_menu_t *actual_menu;
   int actual_sel_line = 0;
   char ch;
+
+  bool flag_harcoded_key_press = false;
 
   actual_menu = bbs_menu_container();
   bbs_menucpy(actual_menu, menu);
@@ -700,59 +773,104 @@ void bbs_start(const bbs_menu_t *menu)
 
   for (;;){
 
-    if(key_is_pressed()){
-      switch (ch = getch()) {
+    if(key_is_pressed() || flag_harcoded_key_press ){
 
-        case 'W':
-        case 'w':
-        case 'S':
-        case 's':
+
+      if (flag_harcoded_key_press)
+        flag_harcoded_key_press = false;
+      else
+        ch = getch();
+
+      do{
+
+        if(ch == KEY_UP || ch == KEY_UP2){
 
           bbs_menu_row_normalize(actual_menu, actual_line_str, actual_sel_line, actual_column, actual_row);
 
-          if(ch == 'W' || ch == 'w')
-            actual_sel_line = (actual_sel_line == 0) ? actual_menu->n_options - 1 : actual_sel_line - 1;
-          else
-            actual_sel_line = (actual_sel_line == (actual_menu->n_options - 1)) ? 0 : actual_sel_line + 1;
+          actual_sel_line = (actual_sel_line == 0) ? actual_menu->n_options - 1 : actual_sel_line - 1;
+          actual_line_str = actual_menu->option[actual_sel_line].name;
+
+          bbs_menu_line_exec(actual_menu, actual_line_str, actual_sel_line, actual_str_buff, &actual_column, &actual_row);
+
+          if(actual_menu->option[actual_sel_line].is_prompt){
+            // after executing a prompt option, the selected line go to the above option
+            ch = KEY_DOWN;
+            flag_harcoded_key_press = true;
+            actual_menu->option[actual_sel_line].callback(actual_str_buff);
+            continue;
+          }
+
+        }
+
+        if(ch == KEY_DOWN || ch == KEY_DOWN2){
+
+          bbs_menu_row_normalize(actual_menu, actual_line_str, actual_sel_line, actual_column, actual_row);
+
+          actual_sel_line = (actual_sel_line == (actual_menu->n_options - 1)) ? 0 : actual_sel_line + 1;
 
           actual_line_str = actual_menu->option[actual_sel_line].name;
           bbs_menu_line_exec(actual_menu, actual_line_str, actual_sel_line, actual_str_buff, &actual_column, &actual_row);
 
-          break;
+          if(actual_menu->option[actual_sel_line].is_prompt){
 
-        case '\r':
-        case '\033':
+            // after executing a prompt option, the selected line go to the above option
+            ch = KEY_DOWN;
+            flag_harcoded_key_press = true;
+            actual_menu->option[actual_sel_line].callback(actual_str_buff);
+            continue;
+          }
 
-          if(ch == '\r'){
+        }
 
-            if(actual_menu->option[actual_sel_line].associated_menu == UNKNOW_MENU)
-              break;
+        if(ch == KEY_ENTER){
 
+          if(actual_menu->option[actual_sel_line].callback != NULL){
+
+            if(actual_menu->option[actual_sel_line].is_prompt){
+              //
+              // this cannot happen because when ending a prompt the line changes to the down option
+              //LOG("ERROR KEY PRESS ENTER IN A PROMPT");
+            }
+            else{
+              actual_menu->option[actual_sel_line].callback(NULL);
+            }
+
+          }
+
+          if(actual_menu->option[actual_sel_line].associated_menu != UNKNOW_MENU){
             bbs_menucpy(actual_menu, bbs_get_child_menu_from_index(actual_menu, actual_menu->option[actual_sel_line].associated_menu));
 
+            actual_sel_line = 0;
+            actual_line_str = actual_menu->option[actual_sel_line].name;
+
+            bbs_menu_line_exec(actual_menu, actual_line_str, actual_sel_line, actual_str_buff, &actual_column, &actual_row);
+
+            bbs_screen_clear();
+            bbs_menu_show_center(actual_menu);
           }
 
-          if(ch == '\033'){
+        }
 
-            if(actual_menu->father == NULL)
-              break;
+        if(ch == KEY_ESCAPE){
 
+          if(actual_menu->father != NULL){
             bbs_menucpy(actual_menu, actual_menu->father);
+
+            actual_sel_line = 0;
+            actual_line_str = actual_menu->option[actual_sel_line].name;
+
+            bbs_menu_line_exec(actual_menu, actual_line_str, actual_sel_line, actual_str_buff, &actual_column, &actual_row);
+
+            bbs_screen_clear();
+            bbs_menu_show_center(actual_menu);
           }
 
-          actual_sel_line = 0;
-          actual_line_str = actual_menu->option[actual_sel_line].name;
+        }
 
-          bbs_menu_line_exec(actual_menu, actual_line_str, actual_sel_line, actual_str_buff, &actual_column, &actual_row);
+      } while (0);
 
-          bbs_screen_clear();
-          bbs_menu_show_center(actual_menu);
 
-          break;
 
-        default:
-          ;
-      }
     }
 
 //    msleep(10);

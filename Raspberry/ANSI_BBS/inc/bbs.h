@@ -22,6 +22,16 @@
 
 #define UNDERSCORE_BLINK_MS 500
 
+#define KEY_ENTER '\r'
+#define KEY_ESCAPE '\033'
+#define KEY_UP 'w'
+#define KEY_UP2 'W'
+#define KEY_DOWN 's'
+#define KEY_DOWN2 'S'
+#define KEY_BACKSPACE 'm'
+
+
+
 typedef enum{
   STATE_LOW,
   STATE_SAME,
