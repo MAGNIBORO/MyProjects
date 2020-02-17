@@ -2,25 +2,14 @@
 #include <stdbool.h>
 #include <bbs.h>
 
-bbs_menu_colour_t aformat = {.background = COLOUR_BLACK,.foreground = COLOUR_RED,.edges_background = COLOUR_BLACK,.edges_foreground = COLOUR_GREEN,
-    .style = STYLE_DISABLED };
 
-bbs_menu_edges_t aedge = { .roof = "~", .walls = "|", .floor = "~", .x_margin = 3, .y_margin = 1};
-
-bbs_menu_colour_t bformat = {.background = COLOUR_RED,.foreground = COLOUR_YELLOW,.edges_background = COLOUR_BLACK,.edges_foreground = COLOUR_GREEN,
-    .style = STYLE_ITALIC };
-
-bbs_menu_edges_t bedge = { .roof = "_", .walls = "|", .floor = "_", .x_margin = 4, .y_margin = 2};
-
-bbs_menu_colour_t cformat = {.background = COLOUR_WHITE,.foreground = COLOUR_BLACK,.edges_background = COLOUR_WHITE,.edges_foreground = COLOUR_BLACK,
+bbs_menu_colour_t format = {.background = COLOUR_WHITE,
+    .foreground = COLOUR_BLACK,
+    .edges_background = COLOUR_WHITE,
+    .edges_foreground = COLOUR_BLACK,
     .style = STYLE_BOLD };
 
-bbs_menu_edges_t cedge = { .roof = "-", .walls = "|", .floor = "-", .x_margin = 5, .y_margin = 3};
-
-bbs_menu_colour_t dformat = {.background = COLOUR_WHITE,.foreground = COLOUR_BLACK,.edges_background = COLOUR_WHITE,.edges_foreground = COLOUR_BLACK,
-    .style = STYLE_BOLD };
-
-bbs_menu_edges_t dedge = { .roof = "-", .walls = "|", .floor = "-", .x_margin = 5, .y_margin = 3};
+bbs_menu_edges_t edge = { .roof = "-", .walls = "|", .floor = "-", .x_margin = 5, .y_margin = 3};
 
 char sum[10];
 int x=0,y=0;
@@ -78,23 +67,17 @@ void main()
   bbs_menu_option_t cp[4];
   bbs_menu_option_t dp[2];
 
-
-//  bbs_str_colour(buf[0], STYLE_BOLD, COLOUR_RED, COLOUR_BLACK);
-//  bbs_str_colour(buf[3], STYLE_BOLD, COLOUR_BLUE, COLOUR_WHITE);
-//  bbs_str_colour(edge.roof, STYLE_ITALIC, COLOUR_BLUE, COLOUR_CYAN);
-//  bbs_str_colour(edge.walls, STYLE_BOLD, COLOUR_RED, COLOUR_GREEN);
-
   bbs_option_menu_new(ap,abuf,aptr,a_arr,3);
-  bbs_menu_t *a = bbs_menu_new(ap, 3, aformat, aedge);
+  bbs_menu_t *a = bbs_menu_new(ap, 3, format, edge);
 
   bbs_option_menu_new(bp,bbuf,bptr,b_arr,4);
-  bbs_menu_t *b = bbs_menu_new(bp, 4, bformat, bedge);
+  bbs_menu_t *b = bbs_menu_new(bp, 4, format, edge);
 
   bbs_option_menu_new(cp,cbuf,cptr,c_arr,4);
-  bbs_menu_t *c = bbs_menu_new(cp, 4, cformat, cedge);
+  bbs_menu_t *c = bbs_menu_new(cp, 4, format, edge);
 
   bbs_option_menu_new(dp,dbuf,dptr,d_arr,2);
-  bbs_menu_t *d = bbs_menu_new(dp, 2, dformat, dedge);
+  bbs_menu_t *d = bbs_menu_new(dp, 2, format, edge);
 
   bbs_add_menu_to_menu(a, b, 0);
   bbs_add_menu_to_menu(a, c, 1);
